@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#030508">
+<title>NEO USA OS</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  :root {
+    --bg-dark: #030508;
+    --bg-panel: #080d14;
+    --bg-card: #0c1219;
+    --bg-hover: #111a25;
+    --border: #1a2535;
+    --text-primary: #e8f0ff;
+    --text-secondary: #6880a0;
+    --text-muted: #3a4a60;
+    --neon-cyan: #00d4ff;
+    --neon-green: #00ff88;
+    --neon-red: #ff3366;
+    --neon-orange: #ff9900;
+    --neon-purple: #8855ff;
+    --glow-cyan: 0 0 20px rgba(0,212,255,0.4);
+    --glow-green: 0 0 20px rgba(0,255,136,0.4);
+    --glow-red: 0 0 20px rgba(255,51,102,0.4);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  
+  html, body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    height: 100%;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Mobile App Container */
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    height: 100dvh;
+    max-width: 500px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Header */
+  .header {
+    padding: calc(12px + var(--safe-top)) 16px 12px;
+    background: linear-gradient(180deg, rgba(0,212,255,0.08), transparent);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 100;
+  }
+  
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+  
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: var(--glow-cyan);
+  }
+  
+  .logo-text {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .idea-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.3);
+    border-radius: 20px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .idea-btn:active { transform: scale(0.95); }
+  .idea-btn-icon { font-size: 16px; }
+  .idea-btn-text { font-size: 11px; font-weight: 500; }
+  .idea-btn-arrow { font-size: 10px; color: var(--neon-cyan); }
+  
+  /* Stats Bar */
+  .stats-bar {
+    display: flex;
+    padding: 12px 16px;
+    gap: 8px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .stat-pill {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  
+  .stat-label {
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+  
+  .stat-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  .stat-value.green { color: var(--neon-green); }
+  .stat-value.red { color: var(--neon-red); }
+  .stat-value.cyan { color: var(--neon-cyan); }
+  .stat-value.orange { color: var(--neon-orange); }
+  
+  /* Map Container */
+  .map-container {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 40%, rgba(0,212,255,0.05), transparent 70%);
+  }
+  
+  .map-svg {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+  }
+  
+  .country-path {
+    fill: var(--bg-card);
+    stroke: var(--border);
+    stroke-width: 0.5;
+    transition: fill 0.3s;
+  }
+  
+  .country-path:active { fill: var(--bg-hover); }
+  .country-path.censored { fill: rgba(255,51,102,0.25); stroke: var(--neon-red); }
+  .country-path.inf-1 { fill: #0a2030; }
+  .country-path.inf-2 { fill: #0a3545; }
+  .country-path.inf-3 { fill: #006644; }
+  .country-path.inf-4 { fill: #009966; }
+  .country-path.inf-5 { fill: var(--neon-green); }
+  
+  .route {
+    fill: none;
+    stroke: var(--neon-cyan);
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 0;
+  }
+  
+  .route.active {
+    opacity: 1;
+    stroke-dasharray: 8 4;
+    animation: flow 0.8s linear infinite;
+    filter: drop-shadow(0 0 4px rgba(0,212,255,0.6));
+  }
+  
+  @keyframes flow { to { stroke-dashoffset: -12; } }
+  
+  /* Bottom Panel */
+  .bottom-panel {
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px calc(12px + var(--safe-bottom));
+    position: relative;
+    z-index: 100;
+  }
+  
+  /* Transmission Row */
+  .trans-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  
+  .trans-row::-webkit-scrollbar { display: none; }
+  
+  .trans-btn {
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 100px;
+  }
+  
+  .trans-btn:active { transform: scale(0.95); }
+  .trans-btn.active { border-color: var(--neon-cyan); background: rgba(0,212,255,0.1); box-shadow: var(--glow-cyan); }
+  .trans-btn.disabled { opacity: 0.4; }
+  .trans-icon { font-size: 18px; }
+  .trans-info { text-align: left; }
+  .trans-name { font-size: 10px; font-weight: 500; }
+  .trans-cost { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--neon-cyan); }
+  
+  /* Action Button */
+  .action-row {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .btn-spread {
+    flex: 1;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    box-shadow: var(--glow-cyan);
+  }
+  
+  .btn-spread:active { transform: scale(0.98); }
+  .btn-spread:disabled { background: var(--bg-card); color: var(--text-muted); box-shadow: none; }
+  
+  .btn-next {
+    background: linear-gradient(135deg, var(--neon-red), #ff33aa);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: var(--glow-red);
+  }
+  
+  .btn-next:active { transform: scale(0.98); }
+  
+  /* Filter Bar */
+  .filter-bar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  
+  .filter-bar::-webkit-scrollbar { display: none; }
+  
+  .filter-chip {
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 6px 12px;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  
+  .filter-chip:active { transform: scale(0.95); }
+  .filter-chip.active { background: var(--neon-cyan); color: var(--bg-dark); border-color: var(--neon-cyan); font-weight: 600; }
+  .filter-chip.region { border-color: var(--neon-purple); }
+  .filter-chip.region.active { background: var(--neon-purple); border-color: var(--neon-purple); }
+  
+  /* Search */
+  .search-bar {
+    position: relative;
+    margin-bottom: 12px;
+  }
+  
+  .search-input {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 12px 12px 40px;
+    font-size: 13px;
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.2s;
+  }
+  
+  .search-input:focus { border-color: var(--neon-cyan); }
+  .search-input::placeholder { color: var(--text-muted); }
+  
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  
+  /* Country List */
+  .country-list {
+    max-height: 200px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--neon-cyan) var(--bg-dark);
+  }
+  
+  .country-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .country-item:active { transform: scale(0.98); }
+  .country-item.selected { border-color: var(--neon-cyan); background: rgba(0,212,255,0.1); }
+  .country-item.censored { opacity: 0.5; border-color: var(--neon-red); }
+  
+  .country-flag { font-size: 20px; }
+  .country-info { flex: 1; }
+  .country-name { font-size: 12px; font-weight: 500; }
+  .country-meta { font-size: 9px; color: var(--text-muted); }
+  
+  .country-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 60px;
+  }
+  
+  .country-bar {
+    height: 4px;
+    background: var(--bg-dark);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  
+  .country-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+  
+  .country-bar-fill.inf { background: var(--neon-green); }
+  .country-bar-fill.cen { background: var(--neon-red); }
+  
+  .country-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--neon-green);
+    width: 35px;
+    text-align: right;
+  }
+  
+  /* News Ticker */
+  .news-ticker {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(180deg, transparent, rgba(3,5,8,0.95));
+    padding: 20px 12px 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 50;
+  }
+  
+  .news-badge {
+    font-size: 8px;
+    font-weight: 700;
+    color: var(--neon-red);
+    background: rgba(255,51,102,0.2);
+    padding: 3px 8px;
+    border-radius: 4px;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  
+  .news-text {
+    flex: 1;
+    font-size: 10px;
+    color: var(--text-secondary);
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  
+  .news-scroll {
+    display: inline-block;
+    animation: scroll 25s linear infinite;
+  }
+  
+  @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  
+  /* Tooltip */
+  .tooltip {
+    position: fixed;
+    background: rgba(12,18,25,0.95);
+    border: 1px solid var(--neon-cyan);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 11px;
+    pointer-events: none;
+    z-index: 1000;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5), var(--glow-cyan);
+    display: none;
+    backdrop-filter: blur(12px);
+    max-width: 180px;
+  }
+  
+  .tooltip-title { font-weight: 600; margin-bottom: 6px; }
+  .tooltip-row { display: flex; justify-content: space-between; margin-bottom: 3px; }
+  .tooltip-label { color: var(--text-muted); }
+  .tooltip-value { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+  .tooltip-value.green { color: var(--neon-green); }
+  .tooltip-value.red { color: var(--neon-red); }
+  
+  /* Game Over Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(3,5,8,0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    backdrop-filter: blur(10px);
+    padding: 20px;
+  }
+  
+  .modal-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+    width: 100%;
+    max-width: 320px;
+    position: relative;
+  }
+  
+  .modal-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 17px;
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    z-index: -1;
+    opacity: 0.3;
+  }
+  
+  .modal-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 16px;
+  }
+  
+  .modal-icon.victory { background: rgba(0,255,136,0.15); border: 2px solid var(--neon-green); box-shadow: var(--glow-green); }
+  .modal-icon.defeat { background: rgba(255,51,102,0.15); border: 2px solid var(--neon-red); box-shadow: var(--glow-red); }
+  
+  .modal-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .modal-title.victory { color: var(--neon-green); }
+  .modal-title.defeat { color: var(--neon-red); }
+  .modal-text { font-size: 12px; color: var(--text-secondary); margin-bottom: 20px; }
+  
+  .modal-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 12px;
+    background: var(--bg-dark);
+    border-radius: 10px;
+  }
+  
+  .modal-stat { text-align: center; }
+  .modal-stat .label { font-size: 8px; text-transform: uppercase; color: var(--text-muted); }
+  .modal-stat .val { font-family: 'JetBrains Mono', monospace; font-size: 18px; color: var(--neon-cyan); }
+  
+  .btn-restart {
+    background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 32px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: var(--glow-cyan);
+  }
+  
+  .btn-restart:active { transform: scale(0.98); }
+  
+  /* Notification */
+  .notification {
+    position: fixed;
+    top: calc(60px + var(--safe-top));
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    animation: fadeInOut 2s ease-in-out;
+  }
+  
+  .notification.success { background: rgba(0,255,136,0.15); border: 1px solid var(--neon-green); color: var(--neon-green); }
+  .notification.warning { background: rgba(255,153,0,0.15); border: 1px solid var(--neon-orange); color: var(--neon-orange); }
+  
+  @keyframes fadeInOut {
+    0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  }
+  
+  .hidden { display: none !important; }
+  
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">NEO USA OS</div>
+    </div>
+    <div class="idea-btn" onclick="cycleIdea()">
+      <span class="idea-btn-icon" id="ideaIcon">🗽</span>
+      <span class="idea-btn-text" id="ideaName">Neo-Americanism</span>
+      <span class="idea-btn-arrow">↻</span>
+    </div>
+  </div>
+  
+  <div class="stats-bar">
+    <div class="stat-pill">
+      <div class="stat-label">Influence</div>
+      <div class="stat-value green" id="statInf">0.0%</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-label">Turn</div>
+      <div class="stat-value orange" id="statTurn">1</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-label">Points</div>
+      <div class="stat-value cyan" id="statPts">30</div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-label">Censor</div>
+      <div class="stat-value red" id="statCen">0%</div>
+    </div>
+  </div>
+  
+  <div class="map-container" id="mapContainer">
+    <svg class="map-svg" id="mapSvg" viewBox="0 0 500 300" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <radialGradient id="oceanGrad" cx="50%" cy="50%" r="70%">
+          <stop offset="0%" style="stop-color:#0a1525"/>
+          <stop offset="100%" style="stop-color:#030508"/>
+        </radialGradient>
+      </defs>
+      <rect x="0" y="0" width="500" height="300" fill="url(#oceanGrad)"/>
+      <g id="graticule" opacity="0.08" stroke="#00d4ff" stroke-width="0.2" fill="none">
+        <line x1="0" y1="150" x2="500" y2="150"/>
+        <line x1="0" y1="75" x2="500" y2="75"/>
+        <line x1="0" y1="225" x2="500" y2="225"/>
+        <line x1="250" y1="0" x2="250" y2="300"/>
+        <line x1="125" y1="0" x2="125" y2="300"/>
+        <line x1="375" y1="0" x2="375" y2="300"/>
+      </g>
+      <g id="countriesGroup"></g>
+      <g id="routesGroup"></g>
+    </svg>
+    <div class="news-ticker">
+      <div class="news-badge">● LIVE</div>
+      <div class="news-text"><span class="news-scroll" id="newsScroll">Initializing global monitoring...</span></div>
+    </div>
+  </div>
+  
+  <div class="bottom-panel">
+    <div class="search-bar">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" placeholder="Search countries..." id="searchInput" oninput="renderList()">
+    </div>
+    
+    <div class="filter-bar">
+      <div class="filter-chip active" onclick="setFilter('all')">All</div>
+      <div class="filter-chip" onclick="setFilter('infected')">Infected</div>
+      <div class="filter-chip" onclick="setFilter('censored')">Censored</div>
+      <div class="filter-chip" onclick="setFilter('clean')">Clean</div>
+      <div class="filter-chip region" onclick="setFilter('NA')">NA</div>
+      <div class="filter-chip region" onclick="setFilter('SA')">SA</div>
+      <div class="filter-chip region" onclick="setFilter('EU')">EU</div>
+      <div class="filter-chip region" onclick="setFilter('AF')">AF</div>
+      <div class="filter-chip region" onclick="setFilter('AS')">AS</div>
+      <div class="filter-chip region" onclick="setFilter('OC')">OC</div>
+    </div>
+    
+    <div class="trans-row" id="transRow"></div>
+    
+    <div class="country-list" id="countryList"></div>
+    
+    <div class="action-row">
+      <button class="btn-spread" id="spreadBtn" disabled>Spread Idea</button>
+      <button class="btn-next" id="nextBtn">Next Turn →</button>
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<div class="modal-overlay hidden" id="gameOver">
+  <div class="modal-card">
+    <div class="modal-icon" id="goIcon">🏆</div>
+    <div class="modal-title" id="goTitle">VICTORY</div>
+    <div class="modal-text" id="goText"></div>
+    <div class="modal-stats">
+      <div class="modal-stat"><div class="label">Turns</div><div class="val" id="goTurns">1</div></div>
+      <div class="modal-stat"><div class="label">Influence</div><div class="val" id="goInfluence">0%</div></div>
+      <div class="modal-stat"><div class="label">Countries</div><div class="val" id="goCountries">0</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartGame()">Play Again</button>
+  </div>
+</div>
+
+<script>
+const IDEAS = [
+  { name: 'Democracy', icon: '🏛️', type: 'Political Ideology' },
+  { name: 'Capitalism', icon: '💰', type: 'Economic System' },
+  { name: 'Socialism', icon: '✊', type: 'Political Movement' },
+  { name: 'Environmentalism', icon: '🌿', type: 'Global Movement' },
+  { name: 'Technocracy', icon: '🤖', type: 'Governance Model' },
+  { name: 'Nationalism', icon: '🏴', type: 'Political Identity' },
+  { name: 'Neo-Americanism', icon: '🗽', type: 'Political Operating System' }
+];
+
+const TRANSMISSIONS = [
+  { id: 'social', name: 'Social', icon: '📱', cost: 3, base: 12, cw: 0.7 },
+  { id: 'word', name: 'Word', icon: '🗣️', cost: 2, base: 7, cw: 1.3 },
+  { id: 'protest', name: 'Protest', icon: '✊', cost: 5, base: 18, cw: 0.4 },
+  { id: 'media', name: 'Media', icon: '📰', cost: 4, base: 14, cw: 0.6 },
+  { id: 'art', name: 'Art', icon: '🎨', cost: 3, base: 10, cw: 1.1 }
+];
+
+const MAP_PATHS = {
+  US:"M65,95 L68,88 L73,85 L80,84 L88,85 L95,88 L100,95 L103,103 L100,112 L98,118 L93,121 L85,124 L78,121 L70,118 L65,110 Z",CA:"M60,58 L65,55 L75,52 L85,50 L93,52 L100,55 L105,62 L108,72 L105,80 L100,86 L93,88 L85,90 L78,91 L70,90 L63,86 L60,78 L58,68 Z",MX:"M60,128 L68,125 L75,128 L80,135 L83,145 L80,155 L75,160 L70,163 L65,162 L60,158 L58,150 L56,140 Z",
+  CO:"M95,205 L100,200 L108,202 L113,208 L115,218 L110,225 L105,228 L98,225 L93,218 L92,210 Z",VE:"M113,198 L120,195 L125,200 L128,208 L125,215 L118,218 L112,215 L110,208 Z",BR:"M115,218 L125,215 L133,220 L138,230 L140,245 L135,258 L128,265 L120,262 L115,255 L112,245 L113,235 L115,228 Z",
+  AR:"M108,268 L115,265 L123,270 L126,280 L123,290 L118,295 L112,292 L108,285 L106,278 Z",CL:"M103,278 L108,275 L112,280 L113,295 L110,305 L106,310 L103,305 L100,295 L99,288 Z",
+  GB:"M190,65 L195,62 L198,68 L200,78 L198,85 L193,88 L188,85 L185,78 L185,70 Z",FR:"M195,95 L202,90 L210,92 L213,102 L210,112 L205,118 L198,115 L192,108 L190,100 Z",DE:"M208,88 L215,85 L222,88 L225,98 L222,105 L215,108 L208,105 L205,98 Z",
+  ES:"M190,115 L200,112 L208,118 L212,128 L208,135 L200,138 L192,135 L188,128 L188,120 Z",IT:"M215,112 L220,110 L225,115 L228,125 L225,135 L220,140 L215,135 L212,125 L212,118 Z",PL:"M220,82 L228,78 L235,82 L238,92 L235,100 L228,105 L220,100 L218,92 Z",
+  UA:"M240,82 L248,78 L255,82 L258,92 L255,102 L248,108 L240,105 L238,95 Z",RU:"M250,40 L265,35 L285,38 L305,45 L325,55 L340,68 L350,82 L355,100 L350,118 L335,128 L315,135 L295,132 L275,128 L258,120 L250,108 L248,92 L248,72 Z",
+  TR:"M245,110 L255,105 L265,110 L268,122 L265,132 L258,135 L250,132 L245,122 Z",SA:"M260,145 L270,140 L280,145 L285,160 L280,175 L270,180 L260,175 L255,160 Z",IR:"M275,118 L288,112 L298,118 L302,135 L298,148 L288,152 L278,148 L272,135 Z",
+  IN:"M305,155 L320,148 L335,158 L342,178 L338,198 L325,210 L312,205 L305,192 L302,175 Z",CN:"M325,110 L345,102 L368,110 L380,128 L378,148 L365,162 L345,168 L328,162 L315,148 L312,132 L315,118 Z",JP:"M380,108 L388,105 L395,110 L398,125 L392,138 L385,142 L378,138 L375,125 L375,115 Z",
+  KR:"M365,118 L372,115 L378,120 L380,132 L375,140 L368,142 L362,138 L360,128 Z",TH:"M330,168 L338,165 L345,170 L348,185 L342,195 L335,198 L328,192 L325,180 Z",VN:"M340,162 L348,158 L355,165 L358,182 L352,195 L345,198 L338,192 L335,178 Z",
+  ID:"M340,210 L355,205 L370,212 L380,225 L375,240 L360,248 L345,242 L335,228 L335,218 Z",AU:"M360,248 L385,242 L410,248 L420,268 L415,285 L395,292 L375,288 L362,278 L358,262 Z",NG:"M215,185 L225,180 L235,185 L238,198 L232,208 L225,212 L218,208 L212,198 Z",
+  EG:"M245,140 L252,138 L258,142 L260,155 L255,165 L248,168 L242,162 L240,150 Z",ZA:"M252,272 L262,268 L272,275 L275,290 L268,300 L258,305 L250,298 L248,285 Z",KE:"M270,195 L278,192 L285,198 L288,212 L282,222 L275,225 L268,218 L265,208 Z"
+};
+
+const NEWS = [
+  "Neural networks detecting ideological propagation patterns",
+  "Global bandwidth capacity adapting to information surge",
+  "Decentralized nodes establishing new transmission pathways",
+  "AI-driven censorship algorithms deployed across borders",
+  "Digital consciousness expanding through network effects",
+  "Silicon Valley servers processing unprecedented data flows"
+];
+
+let state = {
+  turn: 1, points: 30, selected: null, selectedTrans: null, ideaIdx: 6,
+  countries: {}, gameOver: false, routes: [], newsIdx: 0, filter: 'all'
+};
+
+function init() {
+  Object.keys(MAP_PATHS).forEach(id => {
+    state.countries[id] = { influence: 0, censored: false, censorStr: 0 };
+  });
+  renderMap();
+  renderList();
+  renderTrans();
+  updateStats();
+  document.getElementById('spreadBtn').addEventListener('click', doSpread);
+  document.getElementById('nextBtn').addEventListener('click', nextTurn);
+  setInterval(rotateNews, 4000);
+  
+  // Touch events for map
+  const mapSvg = document.getElementById('mapSvg');
+  mapSvg.addEventListener('touchstart', handleTouch, { passive: false });
+  mapSvg.addEventListener('touchmove', handleTouch, { passive: false });
+}
+
+function handleTouch(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const rect = e.target.closest('.map-svg').getBoundingClientRect();
+  const x = ((touch.clientX - rect.left) / rect.width) * 500;
+  const y = ((touch.clientY - rect.top) / rect.height) * 300;
+  
+  // Find closest country
+  let closest = null;
+  let minDist = Infinity;
+  Object.entries(MAP_PATHS).forEach(([id, path]) => {
+    const center = getPathCenter(id);
+    const dist = Math.sqrt(Math.pow(x - center.x, 2) + Math.pow(y - center.y, 2));
+    if (dist < minDist && dist < 30) {
+      minDist = dist;
+      closest = id;
+    }
+  });
+  
+  if (closest && e.type === 'touchend') {
+    selectCountry(closest);
+  }
+}
+
+function renderMap() {
+  const g = document.getElementById('countriesGroup');
+  g.innerHTML = Object.entries(MAP_PATHS).map(([id, path]) => {
+    const s = state.countries[id];
+    let cls = 'country-path';
+    if (s.censored) cls += ' censored';
+    else if (s.influence > 80) cls += ' inf-5';
+    else if (s.influence > 60) cls += ' inf-4';
+    else if (s.influence > 40) cls += ' inf-3';
+    else if (s.influence > 20) cls += ' inf-2';
+    else if (s.influence > 0) cls += ' inf-1';
+    return `<path class="${cls}" d="${path}" data-id="${id}" onclick="selectCountry('${id}')"/>`;
+  }).join('');
+  renderRoutes();
+}
+
+function renderRoutes() {
+  const g = document.getElementById('routesGroup');
+  g.innerHTML = state.routes.map(r => {
+    const p1 = getPathCenter(r.from);
+    const p2 = getPathCenter(r.to);
+    const mx = (p1.x + p2.x) / 2;
+    const my = Math.min(p1.y, p2.y) - 15;
+    return `<path class="route active" d="M${p1.x},${p1.y} Q${mx},${my} ${p2.x},${p2.y}"/>`;
+  }).join('');
+}
+
+function getPathCenter(id) {
+  const path = MAP_PATHS[id];
+  const nums = path.match(/[\d.]+/g).map(Number);
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  for (let i = 0; i < nums.length; i += 2) {
+    minX = Math.min(minX, nums[i]); maxX = Math.max(maxX, nums[i]);
+    minY = Math.min(minY, nums[i+1]); maxY = Math.max(maxY, nums[i+1]);
+  }
+  return { x: (minX + maxX) / 2, y: (minY + maxY) / 2 };
+}
+
+function renderList() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const filter = state.filter || 'all';
+  const list = Object.entries(MAP_PATHS)
+    .filter(([id]) => {
+      const c = COUNTRIES_DATA[id];
+      const s = state.countries[id];
+      if (search && !c?.name?.toLowerCase().includes(search)) return false;
+      if (filter === 'infected' && s.influence === 0) return false;
+      if (filter === 'censored' && !s.censored) return false;
+      if (filter === 'clean' && s.influence > 0) return false;
+      if (['NA','SA','EU','AF','AS','OC'].includes(filter) && c?.region !== filter) return false;
+      return true;
+    })
+    .slice(0, 20)
+    .map(([id]) => {
+      const c = COUNTRIES_DATA[id] || { name: id, flag: '🏳️', pop: 0, region: '?' };
+      const s = state.countries[id];
+      return `<div class="country-item ${state.selected===id?'selected':''} ${s.censored?'censored':''}" onclick="selectCountry('${id}')">
+        <span class="country-flag">${c.flag}</span>
+        <div class="country-info">
+          <div class="country-name">${c.name}</div>
+          <div class="country-meta">${c.region} • ${(c.pop/1000).toFixed(1)}B</div>
+        </div>
+        <div class="country-bars">
+          <div class="country-bar"><div class="country-bar-fill inf" style="width:${s.influence}%"></div></div>
+          <div class="country-bar"><div class="country-bar-fill cen" style="width:${s.censorStr}%"></div></div>
+        </div>
+        <span class="country-pct">${Math.round(s.influence)}%</span>
+      </div>`;
+    }).join('');
+  document.getElementById('countryList').innerHTML = list;
+}
+
+function renderTrans() {
+  document.getElementById('transRow').innerHTML = TRANSMISSIONS.map(t => 
+    `<div class="trans-btn ${state.selectedTrans===t.id?'active':''} ${state.points<t.cost?'disabled':''}" onclick="selectTrans('${t.id}')">
+      <span class="trans-icon">${t.icon}</span>
+      <div class="trans-info">
+        <div class="trans-name">${t.name}</div>
+        <div class="trans-cost">${t.cost} pts</div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+function setFilter(f) {
+  state.filter = f;
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderList();
+}
+
+function selectCountry(id) { state.selected = id; renderMap(); renderList(); updateBtn(); }
+function selectTrans(id) { state.selectedTrans = id; renderTrans(); updateBtn(); }
+function updateBtn() {
+  const c = state.countries[state.selected];
+  const t = TRANSMISSIONS.find(x => x.id === state.selectedTrans);
+  document.getElementById('spreadBtn').disabled = !c || !t || c.censored || state.points < t.cost;
+}
+
+function doSpread() {
+  if (state.gameOver) return;
+  const id = state.selected;
+  const c = state.countries[id];
+  const t = TRANSMISSIONS.find(x => x.id === state.selectedTrans);
+  if (!c || !t || c.censored || state.points < t.cost) return;
+  state.points -= t.cost;
+  const pop = COUNTRIES_DATA[id]?.pop || 10;
+  const res = 0.3 + Math.random() * 0.4;
+  let spread = t.base * (1 - res) * t.cw * (1 + pop / 500);
+  spread = Math.max(1, Math.round(spread));
+  c.influence = Math.min(100, c.influence + spread);
+  showNotification(`${COUNTRIES_DATA[id]?.name || id}: +${spread}%`, 'success');
+  state.routes.push({ from: 'US', to: id });
+  setTimeout(() => { state.routes.shift(); renderRoutes(); }, 2500);
+  if (Math.random() < 0.25 + (c.influence / 100) * 0.35 && !c.censored) {
+    c.censorStr += 15 + Math.floor(Math.random() * 25);
+    if (c.censorStr >= 100) { c.censored = true; c.censorStr = 100; showNotification(`${COUNTRIES_DATA[id]?.name || id}: CENSORED!`, 'warning'); }
+  }
+  const global = getGlobal();
+  if (global > 5) state.points += 2;
+  if (global > 15) state.points += 2;
+  if (global > 30) state.points += 3;
+  updateStats(); renderMap(); renderList(); renderTrans(); checkWin();
+}
+
+function showNotification(msg, type = 'info') {
+  const existing = document.querySelector('.notification');
+  if (existing) existing.remove();
+  const div = document.createElement('div');
+  div.className = `notification ${type}`;
+  div.textContent = msg;
+  document.body.appendChild(div);
+  setTimeout(() => div.remove(), 2000);
+}
+
+function nextTurn() {
+  if (state.gameOver) return;
+  state.turn++;
+  const global = getGlobal();
+  if (global > 20) {
+    const inc = Math.floor(global / 12);
+    Object.keys(state.countries).forEach(id => {
+      const c = state.countries[id];
+      if (!c.censored && c.influence > 5) {
+        c.censorStr = Math.min(100, c.censorStr + inc);
+        if (c.censorStr >= 100) { c.censored = true; c.censorStr = 100; }
+      }
+    });
+  }
+  Object.values(state.countries).forEach(c => { if (c.influence > 0 && !c.censored) c.influence = Math.max(0, c.influence - 1); });
+  state.points += 4 + Math.floor(global / 10);
+  updateStats(); renderMap(); renderList(); renderTrans(); checkWin();
+}
+
+function getGlobal() {
+  const total = Object.values(COUNTRIES_DATA).reduce((s, c) => s + (c.pop || 10), 0);
+  return Object.keys(state.countries).reduce((s, id) => s + (state.countries[id].influence / 100) * (COUNTRIES_DATA[id]?.pop || 10), 0) / total * 100;
+}
+
+function updateStats() {
+  const g = getGlobal();
+  const inf = Object.values(state.countries).filter(c => c.influence > 0).length;
+  const cen = Object.values(state.countries).filter(c => c.censored).length;
+  const avg = Object.values(state.countries).reduce((s, c) => s + c.censorStr, 0) / Object.keys(state.countries).length;
+  document.getElementById('statInf').textContent = g.toFixed(1) + '%';
+  document.getElementById('statCen').textContent = Math.round(avg) + '%';
+  document.getElementById('statPts').textContent = state.points;
+  document.getElementById('statTurn').textContent = state.turn;
+}
+
+function checkWin() {
+  const g = getGlobal();
+  const cen = Object.values(state.countries).filter(c => c.censored).length;
+  if (g >= 50) endGame(true, `${IDEAS[state.ideaIdx].name} has achieved global saturation!`);
+  else if (cen >= 50) endGame(false, 'Too many countries censored. Your idea has been suppressed.');
+}
+
+function endGame(won, text) {
+  state.gameOver = true;
+  document.getElementById('gameOver').classList.remove('hidden');
+  document.getElementById('goIcon').className = 'modal-icon ' + (won ? 'victory' : 'defeat');
+  document.getElementById('goIcon').textContent = won ? '🏆' : '🚫';
+  document.getElementById('goTitle').className = 'modal-title ' + (won ? 'victory' : 'defeat');
+  document.getElementById('goTitle').textContent = won ? 'VICTORY' : 'DEFEAT';
+  document.getElementById('goText').textContent = text;
+  document.getElementById('goTurns').textContent = state.turn;
+  document.getElementById('goInfluence').textContent = getGlobal().toFixed(1) + '%';
+  document.getElementById('goCountries').textContent = Object.values(state.countries).filter(c => c.influence > 0).length;
+}
+
+function restartGame() {
+  state = { turn: 1, points: 30, selected: null, selectedTrans: null, ideaIdx: state.ideaIdx, countries: {}, gameOver: false, routes: [], newsIdx: 0, filter: 'all' };
+  Object.keys(MAP_PATHS).forEach(id => { state.countries[id] = { influence: 0, censored: false, censorStr: 0 }; });
+  document.getElementById('gameOver').classList.add('hidden');
+  document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+  document.querySelector('.filter-chip').classList.add('active');
+  renderMap(); renderList(); renderTrans(); updateStats();
+}
+
+function cycleIdea() {
+  state.ideaIdx = (state.ideaIdx + 1) % IDEAS.length;
+  const idea = IDEAS[state.ideaIdx];
+  document.getElementById('ideaIcon').textContent = idea.icon;
+  document.getElementById('ideaName').textContent = idea.name;
+}
+
+function rotateNews() { if (!state.gameOver) document.getElementById('newsScroll').textContent = NEWS[state.newsIdx++ % NEWS.length]; }
+
+const COUNTRIES_DATA = {
+  US:{name:'United States',flag:'🇺🇸',pop:331,res:0.25,region:'NA'},CA:{name:'Canada',flag:'🇨🇦',pop:38,res:0.3,region:'NA'},MX:{name:'Mexico',flag:'🇲🇽',pop:128,res:0.35,region:'NA'},
+  CO:{name:'Colombia',flag:'🇨🇴',pop:51,res:0.4,region:'SA'},VE:{name:'Venezuela',flag:'🇻🇪',pop:28,res:0.55,region:'SA'},BR:{name:'Brazil',flag:'🇧🇷',pop:213,res:0.35,region:'SA'},
+  AR:{name:'Argentina',flag:'🇦🇷',pop:45,res:0.3,region:'SA'},CL:{name:'Chile',flag:'🇨🇱',pop:19,res:0.3,region:'SA'},
+  GB:{name:'United Kingdom',flag:'🇬🇧',pop:67,res:0.3,region:'EU'},FR:{name:'France',flag:'🇫🇷',pop:67,res:0.3,region:'EU'},DE:{name:'Germany',flag:'🇩🇪',pop:83,res:0.3,region:'EU'},
+  ES:{name:'Spain',flag:'🇪🇸',pop:47,res:0.3,region:'EU'},IT:{name:'Italy',flag:'🇮🇹',pop:60,res:0.3,region:'EU'},PL:{name:'Poland',flag:'🇵🇱',pop:38,res:0.35,region:'EU'},
+  UA:{name:'Ukraine',flag:'🇺🇦',pop:44,res:0.5,region:'EU'},RU:{name:'Russia',flag:'🇷🇺',pop:144,res:0.7,region:'EU'},
+  TR:{name:'Turkey',flag:'🇹🇷',pop:84,res:0.5,region:'AS'},SA:{name:'Saudi Arabia',flag:'🇸🇦',pop:35,res:0.6,region:'AS'},IR:{name:'Iran',flag:'🇮🇷',pop:84,res:0.65,region:'AS'},
+  IN:{name:'India',flag:'🇮🇳',pop:1380,res:0.45,region:'AS'},CN:{name:'China',flag:'🇨🇳',pop:1400,res:0.65,region:'AS'},JP:{name:'Japan',flag:'🇯🇵',pop:126,res:0.3,region:'AS'},
+  KR:{name:'South Korea',flag:'🇰🇷',pop:52,res:0.3,region:'AS'},TH:{name:'Thailand',flag:'🇹🇭',pop:70,res:0.45,region:'AS'},VN:{name:'Vietnam',flag:'🇻🇳',pop:97,res:0.5,region:'AS'},
+  ID:{name:'Indonesia',flag:'🇮🇩',pop:274,res:0.45,region:'AS'},PH:{name:'Philippines',flag:'🇵🇭',pop:110,res:0.45,region:'AS'},
+  AU:{name:'Australia',flag:'🇦🇺',pop:26,res:0.3,region:'OC'},NZ:{name:'New Zealand',flag:'🇳🇿',pop:5,res:0.25,region:'OC'},
+  NG:{name:'Nigeria',flag:'🇳🇬',pop:211,res:0.5,region:'AF'},EG:{name:'Egypt',flag:'🇪🇬',pop:102,res:0.55,region:'AF'},ZA:{name:'South Africa',flag:'🇿🇦',pop:60,res:0.35,region:'AF'},
+  KE:{name:'Kenya',flag:'🇰🇪',pop:54,res:0.45,region:'AF'},ET:{name:'Ethiopia',flag:'🇪🇹',pop:115,res:0.55,region:'AF'}
+};
+
+init();
+</script>
+</body>
+</html>
